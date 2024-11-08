@@ -1,11 +1,19 @@
-const authMiddleware = (req, res, next) => {
-  const user = req.cookies.user ? JSON.parse(req.cookies.user) : null;
+const jwt = require('jsonwebtoken');
+const SECRET_KEY = 'your_secret_key'; // Замените на ваш секретный ключ
 
-  if (user && user.email && user.username && user.role) {
-    req.user = user; // Записываем объект user в локальную переменную запроса
+const authMiddleware = (req, res, next) => {
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  try {
+    const decoded = jwt.verify(token, SECRET_KEY);
+    req.user = decoded; 
     next();
-  } else {
-    res.status(401).json({ message: 'Unauthorized' });
+  } catch (err) {
+    return res.status(401).json({ message: 'Unauthorized' });
   }
 };
 
